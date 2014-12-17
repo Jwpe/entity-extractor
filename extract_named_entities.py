@@ -3,20 +3,53 @@ from bs4 import BeautifulSoup
 import requests
 import operator
 
-response = requests.get('http://www.economist.com/news/international/21636452-better-nothing-much-more-do-keeping-show-road')
 
-soup = BeautifulSoup(response.text)
-[s.decompose() for s in soup('script')]
+def top_entities(url):
 
-sentences = []
+    response = requests.get(url)
 
-for string in soup.stripped_strings:
-    sentences.append(string)
+    sentences = extract_sentences(response)
 
-sentences = [nltk.word_tokenize(sent) for sent in sentences]
-sentences = [nltk.pos_tag(sent) for sent in sentences]
+    chunked_sentences = chunk_sentences(sentences)
 
-chunked_sentences = nltk.ne_chunk_sents(sentences, binary=True)
+    entity_names = []
+    for tree in chunked_sentences:
+        entity_names.extend(extract_entity_names(tree))
+
+    entity_counts = {}
+    for entity in entity_names:
+        try:
+            entity_counts[entity] += 1
+        except KeyError:
+            entity_counts[entity] = 1
+
+    top_entities = sorted(
+        entity_counts.items(), key=operator.itemgetter(1), reverse=True)[:3]
+
+    return top_entities
+
+
+def chunk_sentences(sentences):
+
+    sentences = [nltk.word_tokenize(sent) for sent in sentences]
+    sentences = [nltk.pos_tag(sent) for sent in sentences]
+
+    chunked_sentences = nltk.ne_chunk_sents(sentences, binary=True)
+
+    return chunked_sentences
+
+
+def extract_sentences(response):
+
+    soup = BeautifulSoup(response.text)
+    [s.decompose() for s in soup('script')]
+
+    sentences = []
+
+    for string in soup.stripped_strings:
+        sentences.append(string)
+
+    return sentences
 
 
 def extract_entity_names(t):
@@ -29,15 +62,3 @@ def extract_entity_names(t):
                 entity_names.extend(extract_entity_names(child))
     return entity_names
 
-entity_names = []
-for tree in chunked_sentences:
-    entity_names.extend(extract_entity_names(tree))
-
-entity_counts = {}
-for entity in entity_names:
-    try:
-        entity_counts[entity] += 1
-    except KeyError:
-        entity_counts[entity] = 1
-
-print sorted(entity_counts.items(), key=operator.itemgetter(1), reverse=True)[:3]
