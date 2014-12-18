@@ -2,16 +2,16 @@ from flask import Flask
 
 import flask_nicely
 
-from .extract_named_entities import top_entities
+import extract_named_entities
 
 app = Flask(__name__)
 
 
-@app.route('/url/<url>')
+@app.route('/url/<path:url>')
 @flask_nicely.nice_json
 def return_top_entities(url):
 
-    entities = top_entities
+    entities = extract_named_entities.top_entities(url)
 
     data = {}
 
@@ -23,4 +23,3 @@ def return_top_entities(url):
 if __name__ == '__main__':
 
     app.run(host='0.0.0.0', port=5000, debug=True)
-

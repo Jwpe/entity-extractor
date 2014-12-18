@@ -3,8 +3,10 @@ MAINTAINER Jonathan Evans "jon@trackmaven.com"
 
 RUN pip install requests beautifulsoup4 numpy flask flask_nicely
 
-RUN git clone git@github.com:Jwpe/entity-extractor.git /extractor
+ADD app /app
 
-WORKDIR /extractor
+WORKDIR /app
 
-CMD ["python"]
+EXPOSE 5000 5000
+
+CMD ["python app.py"]
