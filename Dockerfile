@@ -3,10 +3,10 @@ MAINTAINER Jonathan Evans "jon@trackmaven.com"
 
 RUN pip install requests beautifulsoup4 numpy flask flask_nicely
 
-ADD app /app
+ADD entity_extractor /home/app
 
-WORKDIR /app
+WORKDIR /home/app
 
-EXPOSE 5000 5000
+EXPOSE 5000
 
-CMD ["python app.py"]
+CMD python main.py
